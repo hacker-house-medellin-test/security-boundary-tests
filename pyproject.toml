@@ -1,0 +1,11 @@
+[project]
+name = "hacker-house-medellin-test-security-boundary-tests"
+version = "0.1.0"
+description = "Tenant isolation, replay protection, signature verification, path traversal, SSRF, redaction, and CI supply-chain boundary tests."
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.deep-tests]
+suite = "security"
+deterministic = true
+network_default = "disabled"

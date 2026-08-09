@@ -1,0 +1,21 @@
+{
+  "bootstrap_date": "2026-08-08",
+  "bootstrap_operation": "deep-test-fleet-20260808",
+  "description": "Tenant isolation, replay protection, signature verification, path traversal, SSRF, redaction, and CI supply-chain boundary tests.",
+  "organization": "hacker-house-medellin-test",
+  "primary_organization": "hacker-house-medellin",
+  "repository": "security-boundary-tests",
+  "required_paths": [
+    ".github/workflows/deep-tests.yml",
+    ".zpkg.toml",
+    "AGENTS.md",
+    "docs/test-strategy.md",
+    "scripts/verify_repository.py",
+    "src/deep_tests/__init__.py",
+    "tests"
+  ],
+  "schema_version": 1,
+  "suite": "security",
+  "tracking_issue": "https://github.com/ORESoftware/ai-agent-coordinator.rs/issues/139",
+  "visibility": "public"
+}
