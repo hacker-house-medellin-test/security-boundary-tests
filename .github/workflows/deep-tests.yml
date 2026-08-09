@@ -1,0 +1,38 @@
+name: Deep test suite
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 9 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+          cache: ''
+      - name: Compile
+        run: python -m compileall -q src tests scripts
+      - name: Verify repository contract
+        run: python scripts/verify_repository.py
+      - name: Run deterministic deep suite
+        env:
+          PYTHONPATH: src
+          DEEP_TEST_SEEDS: '0-49'
+        run: python -m unittest discover -s tests -v
