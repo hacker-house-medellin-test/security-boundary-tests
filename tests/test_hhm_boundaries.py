@@ -1,10 +1,12 @@
 import hashlib
 import json
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from threading import Barrier
 
 from deep_tests.hhm_boundaries import (
     AuthOutcome,
@@ -313,6 +315,56 @@ class BlePeerSecurityTests(unittest.TestCase):
                 now=self.now,
                 aead_valid=True,
             )
+
+    def test_failed_aead_cannot_poison_replay_state_with_a_high_sequence(self) -> None:
+        unauthenticated = replace(self.envelope, sequence=4294967295)
+        with self.assertRaises(HhmBoundaryViolation):
+            self.gate.accept(
+                certificate=self.certificate,
+                consent=self.consent,
+                session=self.session,
+                envelope=unauthenticated,
+                now=self.now,
+                aead_valid=False,
+            )
+        self.assertEqual(self.gate.attempt_count, 1)
+        self.assertEqual(self.gate.accepted_count, 0)
+
+        self.gate.accept(
+            certificate=self.certificate,
+            consent=self.consent,
+            session=self.session,
+            envelope=self.envelope,
+            now=self.now,
+            aead_valid=True,
+        )
+        self.assertEqual(self.gate.attempt_count, 2)
+        self.assertEqual(self.gate.accepted_count, 1)
+
+    def test_concurrent_duplicate_has_one_atomic_replay_commit(self) -> None:
+        workers = 8
+        barrier = Barrier(workers)
+
+        def attempt() -> bool:
+            barrier.wait(timeout=5)
+            try:
+                self.gate.accept(
+                    certificate=self.certificate,
+                    consent=self.consent,
+                    session=self.session,
+                    envelope=self.envelope,
+                    now=self.now,
+                    aead_valid=True,
+                )
+            except HhmBoundaryViolation:
+                return False
+            return True
+
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            accepted = tuple(executor.map(lambda _: attempt(), range(workers)))
+        self.assertEqual(sum(accepted), 1)
+        self.assertEqual(self.gate.attempt_count, workers)
+        self.assertEqual(self.gate.accepted_count, 1)
 
     def test_proximity_alone_never_establishes_peer_trust(self) -> None:
         for certificate in (

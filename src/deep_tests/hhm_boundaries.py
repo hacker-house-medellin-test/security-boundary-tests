@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path, PurePosixPath
+from threading import Lock
 from typing import Any, Iterable, Mapping, Sequence
 
 
@@ -341,6 +342,19 @@ class BlePeerGate:
         self._seen_nonces: set[tuple[str, str]] = set()
         self._seen_messages: set[tuple[str, str]] = set()
         self._last_sequence: dict[tuple[str, str], int] = {}
+        self._state_lock = Lock()
+        self._attempt_count = 0
+        self._accepted_count = 0
+
+    @property
+    def attempt_count(self) -> int:
+        with self._state_lock:
+            return self._attempt_count
+
+    @property
+    def accepted_count(self) -> int:
+        with self._state_lock:
+            return self._accepted_count
 
     def accept(
         self,
@@ -353,6 +367,15 @@ class BlePeerGate:
         aead_valid: bool,
         decrypted_payload_contains_credential: bool = False,
     ) -> None:
+        """Authenticate and decode before atomically committing replay state.
+
+        Bounded attempt/rate accounting may happen before cryptographic work,
+        but unauthenticated material must never poison nonce, message, or
+        sequence state.
+        """
+
+        with self._state_lock:
+            self._attempt_count += 1
         if not consent.enabled:
             raise HhmBoundaryViolation("peer sharing is not enabled")
         if (
@@ -370,8 +393,6 @@ class BlePeerGate:
             session.local_installation_id != self._local_installation_id
             or session.session_id != envelope.session_id
             or session.expires_at <= now
-            or not aead_valid
-            or decrypted_payload_contains_credential
         ):
             raise HhmBoundaryViolation("peer envelope violates the trust boundary")
         capability = PAYLOAD_CAPABILITY.get(envelope.payload_type)
@@ -386,17 +407,21 @@ class BlePeerGate:
             or envelope.expires_at - envelope.created_at > self.MAX_LIFETIME
         ):
             raise HhmBoundaryViolation("peer envelope timing or size is invalid")
+        if not aead_valid or decrypted_payload_contains_credential:
+            raise HhmBoundaryViolation("peer envelope authentication or payload policy failed")
 
         nonce_key = (certificate.installation_id, envelope.nonce)
         message_key = (certificate.installation_id, envelope.message_id)
         sequence_key = (certificate.installation_id, envelope.session_id)
-        if nonce_key in self._seen_nonces or message_key in self._seen_messages:
-            raise HhmBoundaryViolation("peer message replay detected")
-        if envelope.sequence <= self._last_sequence.get(sequence_key, -1):
-            raise HhmBoundaryViolation("peer sequence replay or reordering detected")
-        self._seen_nonces.add(nonce_key)
-        self._seen_messages.add(message_key)
-        self._last_sequence[sequence_key] = envelope.sequence
+        with self._state_lock:
+            if nonce_key in self._seen_nonces or message_key in self._seen_messages:
+                raise HhmBoundaryViolation("peer message replay detected")
+            if envelope.sequence <= self._last_sequence.get(sequence_key, -1):
+                raise HhmBoundaryViolation("peer sequence replay or reordering detected")
+            self._seen_nonces.add(nonce_key)
+            self._seen_messages.add(message_key)
+            self._last_sequence[sequence_key] = envelope.sequence
+            self._accepted_count += 1
 
 
 @dataclass(frozen=True)

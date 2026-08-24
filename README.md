@@ -23,6 +23,9 @@ The HHM-specific reference tests add deterministic, network-free checks for:
   installation, peer key, house, negotiated capability, encrypted-envelope
   session, nonce, message ID, sequence, expiry, AEAD result, and explicit
   sharing consent;
+- pre-cryptographic attempt accounting with nonce, message, and sequence replay
+  state committed atomically only after AEAD authentication and payload-policy
+  decoding succeed;
 - peer-delivered application updates that still require the canonical release
   signature, exact app/platform/channel, digest, size, and a newer version;
 - inert private HTML components and exact WebSocket origin, frame, and message
