@@ -26,24 +26,6 @@
       "outcome": "degraded"
     }
   ],
-  "ble": {
-    "now": 1787572810,
-    "house_id": "house-medellin",
-    "local_installation_id": "desktop-installation",
-    "peer_installation_id": "flutter-installation",
-    "allowed_purposes": [
-      "trust_handshake",
-      "data_share",
-      "update_chunk"
-    ],
-    "forbidden_purposes": [
-      "door_unlock",
-      "presence_commit",
-      "auth_token",
-      "release_authorization"
-    ],
-    "payload": "synthetic resident-approved data"
-  },
   "component_headers": {
     "content-type": "text/html; charset=utf-8",
     "x-hhm-component-contract": "hhm.component.v1",

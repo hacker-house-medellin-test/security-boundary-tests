@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hacker-house-medellin/hhm-interfaces/schemas/peer-session.json",
+  "title": "HHM authenticated peer-session contracts",
+  "description": "Versioned envelopes for a consented nearby transport. Bluetooth discovery and proximity are never identity, authentication, authorization, assurance, or permission to install software.",
+  "$defs": {
+    "ProtocolVersion": {
+      "type": "string",
+      "const": "hhm.p2p.v1"
+    },
+    "Base64Url": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "Capability": {
+      "type": "string",
+      "enum": [
+        "resident_message",
+        "contact_card",
+        "file_manifest",
+        "update_manifest"
+      ]
+    },
+    "HandshakeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_version",
+        "session_id",
+        "offer_id",
+        "challenge_nonce",
+        "ephemeral_public_key",
+        "device_key_id",
+        "device_attestation",
+        "requested_capabilities",
+        "expires_at"
+      ],
+      "properties": {
+        "protocol_version": { "$ref": "#/$defs/ProtocolVersion" },
+        "session_id": { "type": "string", "format": "uuid" },
+        "offer_id": { "type": "string", "format": "uuid" },
+        "challenge_nonce": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 22,
+          "maxLength": 86
+        },
+        "ephemeral_public_key": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 43,
+          "maxLength": 86
+        },
+        "device_key_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "device_attestation": {
+          "description": "Short-lived, audience-bound, nonce-bound signed device proof. It is not a bearer session token or protected-introspection credential.",
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 64,
+          "maxLength": 4096
+        },
+        "requested_capabilities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Capability" },
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "expires_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "HandshakeResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_version",
+        "session_id",
+        "offer_id",
+        "decision",
+        "selected_capabilities",
+        "expires_at"
+      ],
+      "properties": {
+        "protocol_version": { "$ref": "#/$defs/ProtocolVersion" },
+        "session_id": { "type": "string", "format": "uuid" },
+        "offer_id": { "type": "string", "format": "uuid" },
+        "decision": {
+          "type": "string",
+          "enum": ["accepted", "rejected"]
+        },
+        "selected_capabilities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Capability" },
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "ephemeral_public_key": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 43,
+          "maxLength": 86
+        },
+        "device_key_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "device_attestation": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 64,
+          "maxLength": 4096
+        },
+        "transcript_signature": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 64,
+          "maxLength": 512
+        },
+        "rejection_code": {
+          "type": "string",
+          "enum": [
+            "consent_declined",
+            "expired",
+            "replayed",
+            "attestation_invalid",
+            "capability_denied",
+            "rate_limited",
+            "unsupported_version"
+          ]
+        },
+        "expires_at": { "type": "string", "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "decision": { "const": "accepted" } },
+            "required": ["decision"]
+          },
+          "then": {
+            "required": [
+              "ephemeral_public_key",
+              "device_key_id",
+              "device_attestation",
+              "transcript_signature"
+            ],
+            "properties": {
+              "selected_capabilities": { "minItems": 1 }
+            },
+            "not": { "required": ["rejection_code"] }
+          },
+          "else": {
+            "required": ["rejection_code"],
+            "properties": {
+              "selected_capabilities": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "PayloadType": {
+      "type": "string",
+      "enum": [
+        "hhm.resident-message.v1",
+        "hhm.contact-card.v1",
+        "hhm.file-manifest.v1",
+        "hhm.update-manifest.v1",
+        "hhm.receipt.v1"
+      ]
+    },
+    "EncryptedEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_version",
+        "session_id",
+        "message_id",
+        "sequence",
+        "payload_type",
+        "nonce",
+        "ciphertext",
+        "sender_key_id",
+        "created_at",
+        "expires_at"
+      ],
+      "properties": {
+        "protocol_version": { "$ref": "#/$defs/ProtocolVersion" },
+        "session_id": { "type": "string", "format": "uuid" },
+        "message_id": { "type": "string", "format": "uuid" },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "payload_type": { "$ref": "#/$defs/PayloadType" },
+        "nonce": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 16,
+          "maxLength": 64
+        },
+        "ciphertext": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 1,
+          "maxLength": 87384
+        },
+        "sender_key_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "created_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "SignedUpdateManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "app_id",
+        "platform",
+        "channel",
+        "version",
+        "anti_rollback_counter",
+        "artifact_size",
+        "artifact_sha256",
+        "artifact_url",
+        "signing_key_id",
+        "signature",
+        "published_at"
+      ],
+      "properties": {
+        "schema": { "type": "string", "const": "hhm.update-manifest.v1" },
+        "app_id": {
+          "type": "string",
+          "enum": ["hhm-flutter", "hhm-desktop-app.rs"]
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["android", "ios", "linux", "macos", "windows", "web"]
+        },
+        "channel": { "type": "string", "enum": ["stable", "beta"] },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "anti_rollback_counter": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "artifact_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483648
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "artifact_url": {
+          "description": "An allowlisted, official HTTPS release location. A peer is only a discovery/cache hint.",
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "signing_key_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+        },
+        "signature": {
+          "allOf": [{ "$ref": "#/$defs/Base64Url" }],
+          "minLength": 64,
+          "maxLength": 512
+        },
+        "published_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

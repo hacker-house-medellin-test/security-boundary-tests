@@ -1,0 +1,15 @@
+{
+  "repository": "hacker-house-medellin/hhm-interfaces",
+  "pull_request": "https://github.com/hacker-house-medellin/hhm-interfaces/pull/4",
+  "commit": "f694bc9b58907db918f0449b5d04a5763f8fa745",
+  "files": {
+    "fixtures/peer-session.json": {
+      "git_blob": "75df4f5435b67d278f8ea19286b192e8eca0cf10",
+      "sha256": "cc8c94f006db484196645056878342eccb6ad39c6ec42a77928ff35c6bdc92d8"
+    },
+    "schemas/peer-session.json": {
+      "git_blob": "94e72f5fbf65815f28ba718cabceb93ebf9b744c",
+      "sha256": "2e9ab7864a1f3ac991dd76c43b2fec71ad075ba9ea760df1364e5119dde4a965"
+    }
+  }
+}
