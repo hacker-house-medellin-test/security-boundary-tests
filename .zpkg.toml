@@ -1,10 +1,23 @@
 [package]
-name = "hacker-house-medellin-test/security-boundary-tests"
+org = "hacker-house-medellin-test"
+name = "security-boundary-tests"
 version = "0.1.0"
-type = "test-suite"
+description = "Tenant isolation, replay protection, signature verification, path traversal, SSRF, redaction, and CI supply-chain boundary tests."
+license = "MIT"
+language = "python"
 
-[develop]
-commands = [
-  "PYTHONPATH=src python -m unittest discover -s tests -v",
-  "python scripts/verify_repository.py"
-]
+[package.repository]
+vcs = "git"
+url = "https://github.com/hacker-house-medellin-test/security-boundary-tests"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+exclude = [".env", ".env.*", ".venv/**", ".vendor/**", "vendor/**", "artifacts/**", "**/__pycache__/**", "**/*.pyc", ".pytest_cache/**"]
+
+[install]
+dir = ".vendor/.zed"
+adapter = "none"
+
+[scripts]
+test = "PYTHONPATH=src python -m unittest discover -s tests -v && python scripts/verify_repository.py"
