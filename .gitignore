@@ -11,3 +11,8 @@ htmlcov/
 tmp/temp/
 tmp/worktrees/
 # <<< ores fleet hygiene <<<
+
+# Repository-local temporary data and authorized Git worktrees
+tmp
+temp
+temp/worktrees
