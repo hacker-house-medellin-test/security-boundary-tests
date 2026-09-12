@@ -1,0 +1,51 @@
+{
+  "handshake_request": {
+    "protocol_version": "hhm.p2p.v1",
+    "session_id": "c15b582d-82a4-4e73-a003-5b9cf4cbcb91",
+    "offer_id": "29145ac0-6bc9-461c-94cd-dd328b2e03aa",
+    "challenge_nonce": "BBBBBBBBBBBBBBBBBBBBBB",
+    "ephemeral_public_key": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+    "device_key_id": "device:example-1",
+    "device_attestation": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "requested_capabilities": ["resident_message", "update_manifest"],
+    "expires_at": "2026-08-24T18:01:00Z"
+  },
+  "handshake_response": {
+    "protocol_version": "hhm.p2p.v1",
+    "session_id": "c15b582d-82a4-4e73-a003-5b9cf4cbcb91",
+    "offer_id": "29145ac0-6bc9-461c-94cd-dd328b2e03aa",
+    "decision": "accepted",
+    "selected_capabilities": ["resident_message", "update_manifest"],
+    "ephemeral_public_key": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "device_key_id": "device:example-2",
+    "device_attestation": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+    "transcript_signature": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS",
+    "expires_at": "2026-08-24T18:01:00Z"
+  },
+  "encrypted_envelope": {
+    "protocol_version": "hhm.p2p.v1",
+    "session_id": "c15b582d-82a4-4e73-a003-5b9cf4cbcb91",
+    "message_id": "c9a2e32e-8a5d-4666-b0b1-aaf2adb9b00b",
+    "sequence": 1,
+    "payload_type": "hhm.update-manifest.v1",
+    "nonce": "NNNNNNNNNNNNNNNNNNNNNN",
+    "ciphertext": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+    "sender_key_id": "device:example-1",
+    "created_at": "2026-08-24T18:00:00Z",
+    "expires_at": "2026-08-24T18:05:00Z"
+  },
+  "signed_update_manifest": {
+    "schema": "hhm.update-manifest.v1",
+    "app_id": "hhm-flutter",
+    "platform": "android",
+    "channel": "stable",
+    "version": "1.2.3",
+    "anti_rollback_counter": 7,
+    "artifact_size": 1024,
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_url": "https://releases.example.invalid/hhm-flutter-1.2.3.apk",
+    "signing_key_id": "release:example-1",
+    "signature": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS",
+    "published_at": "2026-08-24T18:00:00Z"
+  }
+}

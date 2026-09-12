@@ -1,0 +1,71 @@
+{
+  "auth_cases": [
+    {
+      "credential_present": false,
+      "verdicts": [],
+      "outcome": "anonymous"
+    },
+    {
+      "credential_present": true,
+      "verdicts": ["authenticated", "unavailable"],
+      "outcome": "authenticated"
+    },
+    {
+      "credential_present": true,
+      "verdicts": ["invalid", "invalid"],
+      "outcome": "unauthenticated"
+    },
+    {
+      "credential_present": true,
+      "verdicts": ["invalid", "unavailable"],
+      "outcome": "degraded"
+    },
+    {
+      "credential_present": true,
+      "verdicts": ["unavailable", "unavailable"],
+      "outcome": "degraded"
+    }
+  ],
+  "component_headers": {
+    "content-type": "text/html; charset=utf-8",
+    "x-hhm-component-contract": "hhm.component.v1",
+    "cache-control": "private, no-store",
+    "referrer-policy": "no-referrer",
+    "x-content-type-options": "nosniff",
+    "content-security-policy": "default-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; sandbox"
+  },
+  "websocket_origins": [
+    {
+      "host": "example.test",
+      "origin": "https://example.test",
+      "accepted": true
+    },
+    {
+      "host": "example.test:443",
+      "origin": "https://example.test",
+      "accepted": true
+    },
+    {
+      "host": "example.test",
+      "origin": "https://attacker.test",
+      "accepted": false
+    },
+    {
+      "host": "example.test",
+      "origin": "https://example.test/path",
+      "accepted": false
+    },
+    {
+      "host": "example.test",
+      "origin": "null",
+      "accepted": false
+    }
+  ],
+  "sops_ciphertext_lines": [
+    "HHM_API_BASE_URL=ENC[AES256_GCM,data:synthetic,iv:synthetic,tag:synthetic,type:str]",
+    "sops_age__list_0__map_recipient=age1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+    "sops_age__list_1__map_recipient=age1pppppppppppppppppppppppppppppppppppppppppppppppp",
+    "sops_mac=ENC[AES256_GCM,data:synthetic,iv:synthetic,tag:synthetic,type:str]",
+    "sops_version=3.13.3"
+  ]
+}
