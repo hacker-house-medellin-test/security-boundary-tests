@@ -13,6 +13,9 @@ tmp/worktrees/
 # <<< ores fleet hygiene <<<
 
 # Repository-local temporary data and authorized Git worktrees
-tmp
-temp
+tmp/
+temp/
 temp/worktrees
+
+# machine-local symlink to ORESoftware/my-ai AGENTS.md; never committed
+.ores/
